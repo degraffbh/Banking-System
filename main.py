@@ -44,7 +44,7 @@ def menu_page():
         case 6:
             print("\nModify Account")
         case _:
-            print("Invalid command")
+            print("\nInvalid command")
 
 login_screen()
 menu_page()
