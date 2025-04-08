@@ -1,3 +1,15 @@
+import mysql.connector
+
+connection = mysql.connector.connect(user = 'root', database = 'pokemon', password = 'Brook9!!!')
+cursor = connection.cursor()
+testQuery = ('SELECT * FROM pokemon_type')
+cursor.execute(testQuery)
+for item in cursor:
+    print(item)
+
+cursor.close()
+connection.close()
+
 def login_screen():
     print("\nBen's Banking System\nLogin Page\n")
 
