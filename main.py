@@ -1,14 +1,11 @@
 import mysql.connector
 
-connection = mysql.connector.connect(user = 'root', database = 'pokemon', password = 'Brook9!!!')
+connection = mysql.connector.connect(user = 'root', database = 'banking', password = 'Brook9!!!')
 cursor = connection.cursor()
-testQuery = ('SELECT * FROM pokemon_type')
+testQuery = ('SELECT * FROM user')
 cursor.execute(testQuery)
 for item in cursor:
     print(item)
-
-cursor.close()
-connection.close()
 
 def login_screen():
     print("\nBen's Banking System\nLogin Page\n")
@@ -20,14 +17,19 @@ def login_screen():
 
         #Add code to check if account number is in database and if pin matches
     else:
+        name = input("What is your name? ")
         account_number = input("Please enter an account number: ")
         valid_pin = False
         while (valid_pin == False):
-            pin = int(input("Please enter a minimum 8 digit pin: "))
-            if (len(str(pin)) >= 8):
+            pin = int(input("Please enter a 4 digit pin: "))
+            if (len(str(pin)) == 4):
                 valid_pin = True
+        balance = input("How much money would you like to deposit as your starting balance? ")
 
-        #Add code to add account to database
+        sql = "INSERT INTO user (account_num, pin, balance, account_name) VALUES (%s, %s, %s, %s)"
+        val = (account_number, pin, balance, name)
+        cursor.execute(sql, val)
+        connection.commit()
 
         print(f"Ben's Banking account {account_number} created sucessfully!")
 
@@ -60,3 +62,6 @@ def menu_page():
 
 login_screen()
 menu_page()
+
+cursor.close()
+connection.close()
