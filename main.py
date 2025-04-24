@@ -49,6 +49,7 @@ def login_screen():
                 cursorThree = connection.cursor()
                 cursorThree.execute(getNameQuery, val)
                 for item in cursorThree:
+                    global USER_ACCOUNT_NAME
                     USER_ACCOUNT_NAME = str(item)[2:len(item)-4]
                     print(f'\nWelcome {str(item)[2:len(item)-4]}!')
                 cursorThree.close()
@@ -86,40 +87,43 @@ def menu_page():
         print("(4) Delete Account")
         print("(5) Modify Account")
         print("(6) Exit")
-        answer = int(input("> "))
+        answer = input("> ")
 
         match answer:
-            case 1:
-                getBalanceQuery = ('SELECT balance FROM user WHERE account_name = "Ben DeGraff"') #Need to add account_name varaible
+            case "1":
+                getBalanceQuery = ('SELECT balance FROM user WHERE account_name = %s') 
+                val = (USER_ACCOUNT_NAME,)
                 cursor = connection.cursor()
-                cursor.execute(getBalanceQuery)
+                cursor.execute(getBalanceQuery, val)
                 for item in cursor:
                     print(f'\nYour current balance is ${str(item)[1:len(item)-3]}')
                 cursor.close()
                 time.sleep(1.5)
-            case 2:
+            case "2":
                 new_balance = int(input("How much money would you like to deposit? "))
-                getBalanceQuery = ('SELECT balance FROM user WHERE account_name = "Ben DeGraff"') #Need to add account_name varaible
+                getBalanceQuery = ('SELECT balance FROM user WHERE account_name = %s') 
+                val = (USER_ACCOUNT_NAME,)
                 cursor = connection.cursor()
-                cursor.execute(getBalanceQuery)
+                cursor.execute(getBalanceQuery, val)
                 for item in cursor:
                     new_balance += int(str(item)[1:len(item)-3])
                 cursor.close()
 
                 updateBalanceQuery = ('UPDATE user SET balance = %s WHERE account_name = %s') 
-                val = (new_balance, "Ben DeGraff")
+                val = (new_balance, USER_ACCOUNT_NAME)
                 cursor = connection.cursor()
                 cursor.execute(updateBalanceQuery, val)
                 connection.commit()
                 cursor.close()
                 print("Balance Updated")
-            case 3:
+            case "3":
                 isValid = False
                 while isValid == False:
                     new_balance = int(input("How much money would you like to withdraw? "))
-                    getBalanceQuery = ('SELECT balance FROM user WHERE account_name = "Ben DeGraff"') #Need to add account_name varaible
+                    getBalanceQuery = ('SELECT balance FROM user WHERE account_name = %s') 
+                    val = (USER_ACCOUNT_NAME,)
                     cursor = connection.cursor()
-                    cursor.execute(getBalanceQuery)
+                    cursor.execute(getBalanceQuery, val)
                     for item in cursor:
                         if int(str(item)[1:len(item)-3]) >= new_balance:
                             new_balance = int(str(item)[1:len(item)-3]) - new_balance
@@ -129,17 +133,54 @@ def menu_page():
                     cursor.close()
                
                 updateBalanceQuery = ('UPDATE user SET balance = %s WHERE account_name = %s') 
-                val = (new_balance, "Ben DeGraff")
+                val = (new_balance, USER_ACCOUNT_NAME)
                 cursor = connection.cursor()
                 cursor.execute(updateBalanceQuery, val)
                 connection.commit()
                 cursor.close()
                 print("Balance Updated")
-            case 4:
-                print("\nDelete Account")
-            case 5:
-                print("\nModify Account")
-            case 6:
+            case "4":
+                delete_account = input("Are you sure you want to delete your account? (Type in 'YES' in all caps to confirm) ")
+                if delete_account == "YES":
+                    deleteAccountQuery = ('DELETE FROM user WHERE account_name = %s') 
+                    val = (USER_ACCOUNT_NAME,)
+                    cursor = connection.cursor()
+                    cursor.execute(deleteAccountQuery, val)
+                    connection.commit()
+                    cursor.close()
+                    print("Account deleted.")
+                    isUsingApp = False
+            case "5":
+                print("\nWhat would you like to modify? ")
+                print("(1) Account Name")
+                print("(2) Account Number")
+                print("(3) Account Pin")
+                answer = input("> ")
+
+                modifyAccountQuery = None
+                change = None
+                isValid = False
+                while isValid == False:
+                    isValid = True
+                    if answer == "1":
+                        change = input("What is your new account name? ")
+                        modifyAccountQuery = ('UPDATE user SET account_name = %s WHERE account_name = %s') 
+                    elif answer == "2":
+                        change = input("What is your new account number? ")
+                        modifyAccountQuery = ('UPDATE user SET account_num = %s WHERE account_name = %s') 
+                    elif answer == "3":
+                        change = input("What is your new account pin? ")
+                        modifyAccountQuery = ('UPDATE user SET pin = %s WHERE account_name = %s') 
+                    else:
+                        isValid = False
+                        print("Invalid answer")
+                val = (change, USER_ACCOUNT_NAME)
+                cursor = connection.cursor()
+                cursor.execute(modifyAccountQuery, val)
+                connection.commit()
+                cursor.close()
+                print("Account Updated")
+            case "6":
                 print("\nHave a good rest of your day!")
                 isUsingApp = False
             case _:
