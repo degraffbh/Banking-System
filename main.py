@@ -44,7 +44,6 @@ def login_screen():
 
             if validNum == True and validPin == True:
                 isValid = True
-                name = None
                 getNameQuery = ('SELECT account_name FROM user WHERE account_num = %s')
                 val = (account_number,)
                 cursorThree = connection.cursor()
@@ -89,7 +88,6 @@ def menu_page():
         print("(6) Exit")
         answer = int(input("> "))
 
-        #Need to code all the actions 
         match answer:
             case 1:
                 getBalanceQuery = ('SELECT balance FROM user WHERE account_name = "Ben DeGraff"') #Need to add account_name varaible
