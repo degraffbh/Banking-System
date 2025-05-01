@@ -1,5 +1,6 @@
 import mysql.connector
 import time
+import unittest
 
 connection = mysql.connector.connect(user = 'root', database = 'banking', password = 'Brook9!!!')
 cursor = connection.cursor()
@@ -15,7 +16,7 @@ def login_screen():
     print("\nBen's Banking System\nLogin Page\n")
 
     login_or_new = input("Sign in (s) or make a new account (n)? ")
-    if (login_or_new == "s"):
+    if (login_or_new == "s"): #If Signing In
         isValid = False
        
         while isValid == False:
@@ -57,7 +58,7 @@ def login_screen():
                 print("Login information incorrect. Please try again.")
             
             
-    else:
+    else: #If loggin in
         name = input("What is your name? ")
         account_number = input("Please enter an account number: ")
         valid_pin = False
@@ -90,7 +91,7 @@ def menu_page():
         answer = input("> ")
 
         match answer:
-            case "1":
+            case "1": #Check Balance Code
                 getBalanceQuery = ('SELECT balance FROM user WHERE account_name = %s') 
                 val = (USER_ACCOUNT_NAME,)
                 cursor = connection.cursor()
@@ -99,7 +100,7 @@ def menu_page():
                     print(f'\nYour current balance is ${str(item)[1:len(item)-3]}')
                 cursor.close()
                 time.sleep(1.5)
-            case "2":
+            case "2": #Deposit Code
                 new_balance = int(input("How much money would you like to deposit? "))
                 getBalanceQuery = ('SELECT balance FROM user WHERE account_name = %s') 
                 val = (USER_ACCOUNT_NAME,)
@@ -116,7 +117,7 @@ def menu_page():
                 connection.commit()
                 cursor.close()
                 print("Balance Updated")
-            case "3":
+            case "3": #Withdraw Code
                 isValid = False
                 while isValid == False:
                     new_balance = int(input("How much money would you like to withdraw? "))
@@ -139,7 +140,7 @@ def menu_page():
                 connection.commit()
                 cursor.close()
                 print("Balance Updated")
-            case "4":
+            case "4": #Delete Account Code
                 delete_account = input("Are you sure you want to delete your account? (Type in 'YES' in all caps to confirm) ")
                 if delete_account == "YES":
                     deleteAccountQuery = ('DELETE FROM user WHERE account_name = %s') 
@@ -150,7 +151,7 @@ def menu_page():
                     cursor.close()
                     print("Account deleted.")
                     isUsingApp = False
-            case "5":
+            case "5": #Modify Account Code
                 print("\nWhat would you like to modify? ")
                 print("(1) Account Name")
                 print("(2) Account Number")
@@ -180,7 +181,7 @@ def menu_page():
                 connection.commit()
                 cursor.close()
                 print("Account Updated")
-            case "6":
+            case "6": #Exit Code
                 print("\nHave a good rest of your day!")
                 isUsingApp = False
             case _:
@@ -188,5 +189,38 @@ def menu_page():
 
 login_screen()
 menu_page()
+
+def test(pin, account_number):
+    validNum = False
+    validPin = False
+    
+    #Checking for valid account_num
+    checkAccountQuery = ('SELECT %s FROM user WHERE account_num = %s') 
+    val = (pin, account_number)
+    cursor = connection.cursor()
+    cursor.execute(checkAccountQuery, val)
+    for item in cursor:
+        validNum = True
+    cursor.close()
+
+    #Checking for valid pin
+    checkPinQuery = ('SELECT %s FROM user WHERE pin = %s') 
+    val = (account_number, pin)
+    cursorTwo = connection.cursor()
+    cursorTwo.execute(checkPinQuery, val)
+    for item in cursorTwo:
+        validPin = True
+    cursorTwo.close()
+
+    if validNum == True and validPin == True:
+        return True
+    return False
+
+class TestIsValidLogin(unittest.TestCase):
+    def testIfCanLogin(self):
+        self.assertFalse(test(1234, 58292950))
+
+if __name__ == '__main__':
+    unittest.main()
 
 connection.close()
